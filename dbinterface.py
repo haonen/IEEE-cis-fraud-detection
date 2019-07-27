@@ -29,14 +29,12 @@ def create_table_from_csv_sql(csv_file, non_number_column_pattern, table_name):
 
 class DBInterface:
     connection = None
-    cur = None
     def __init__(self, user, password, host, port, database):
         self.connection = psycopg2.connect(user=user, 
                 password=password, 
                 host=host, 
                 port=port, 
                 database=database)
-        self.cur = self.connection.cursor()
     
     def __del__(self):
         self.connection.close()
@@ -44,19 +42,26 @@ class DBInterface:
     def build_table_from_csv(self, csv_file, non_number_column_pattern, table_name):
         # drop existing table
         sql_statement = "DROP TABLE " + table_name + ";"
+        cur = self.connection.cursor()
         try:
-            self.cur.execute(sql_statement)
+            cur.execute(sql_statement)
         except psycopg2.errors.UndefinedTable:
             self.connection.rollback()
         # create table
         sql_statement = create_table_from_csv_sql(csv_file, non_number_column_pattern, table_name)
-        self.cur.execute(sql_statement)
+        cur.execute(sql_statement)
         # copy data
         header = read_header(csv_file)
         f = open(csv_file)
         f.readline()
-        self.cur.copy_from(f, table_name, columns=header, sep=',', null="")
+        cur.copy_from(f, table_name, columns=header, sep=',', null="")
         self.connection.commit()
+
+    def get_cursor(self):
+        """
+        Return a cursor of the database.
+        """
+        return self.connection.cursor()
 
 class DataSource:
     """
@@ -80,6 +85,34 @@ class DataSource:
             self.dbinstance.build_table_from_csv(fn, pat, table_name)
             print("Loaded table " + table_name)
 
+    def select_data_by_transactiondt(self, set_label, low, high, feature_list=None):
+        """
+        Select data from a set where transactionDT is in [low, high).
+        `set_label` can be `train` or `test`. 
+        If `feature_list` is None, all columns will be retrieved;
+
+        Return a cursor object of the selected data. 
+        """
+        tt = set_label + '_transaction'
+        it = set_label + '_identity'
+        stat = "SELECT {0} FROM {1}, {2} WHERE {1}.transactionid={2}.transactionid \
+                AND {1}.transactiondt>={3} AND {1}.transactiondt<{4};"
+        
+        if feature_list is not None:
+            # transactionid is an ambigious term which appears in both table
+            feature_list = [item if item!='transactionid' else tt+'.' + item for item in feature_list]
+            feature_list= ', '.join(feature_list)
+        else:
+            feature_list = "*"
+        stat = stat.format(feature_list, tt, it, low, high)
+        cur = self.dbinstance.get_cursor();
+        cur.execute(stat)
+        return cur
+
 if __name__ == "__main__":
     datasource = DataSource()
-    datasource.load_data_to_db('.')
+    # datasource.load_data_to_db('.')
+    cur = datasource.select_data_by_transactiondt('train', 0, 1000000000, ['transactionid', 'card4', 'card6', 'devicetype', 'id_01', 'id_02', 'isfraud'])
+    for item in cur:
+        print(item)
+        input()
