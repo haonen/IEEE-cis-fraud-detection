@@ -5,6 +5,7 @@ import psycopg2
 from config import config
 from utils import *
 import os
+import pandas
 
 def create_table_from_csv_sql(csv_file, non_number_column_pattern, table_name):
     """
@@ -109,10 +110,20 @@ class DataSource:
         cur.execute(stat)
         return cur
 
+def cursor_to_dataframe(cur):
+    """
+    Transfer a database cursor into a pandas DataFrame.
+    """
+    description = cur.description
+    column_names = [item.name for item in description]
+    data = cur.fetchall()
+    df = pandas.DataFrame(data, columns=column_names)
+    cur.close()
+    return df
+
 if __name__ == "__main__":
     datasource = DataSource()
     # datasource.load_data_to_db('.')
     cur = datasource.select_data_by_transactiondt('train', 0, 1000000000, ['transactionid', 'card4', 'card6', 'devicetype', 'id_01', 'id_02', 'isfraud'])
-    for item in cur:
-        print(item)
-        input()
+    df = cursor_to_dataframe(cur)
+    print(df)
