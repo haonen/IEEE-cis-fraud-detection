@@ -147,6 +147,34 @@ class DataSource:
         cur = self.dbinstance.execure_sql(sql)
         return cur
 
+    def set_impute_table_value(self, card4, card6, feature_name, impute_value):
+        """
+        set impute_table value of `feature_name` to `impute_value`.
+        if the record for (card4, card6) does not exist, it will create one.
+        """
+        cur = self.dbinstance.execure_sql("select count(*) from impute_table where card4='"+card4+"' and card6='"+card6+"';")
+        record_num = cur.fetchone()[0]
+        if record_num == 0:
+            sql = "insert into impute_table(card4, card6, {0}) values ('{1}', '{2}', {3});"
+            sql = sql.format(feature_name, card4, card6, impute_value)
+            self.dbinstance.execure_sql(sql, True)
+        else:
+            sql = "update impute_table set {0}={1} where card4='{2}' and card6='{3}';"
+            sql = sql.format(feature_name, impute_value, card4, card6)
+            self.dbinstance.execure_sql(sql, True)
+    def read_impute_table_value(self, card4, card6, feature_names=None):
+        """
+        read the record in impute table of (card4, card6) does not exist.
+        return a cursor
+        `feature_names` is the list of all features you want to retrieve. None means all features.
+        """
+        if feature_names == None:
+            feature_names = "*"
+        else:
+            feature_names = ", ".join(feature_names)
+        cur = self.dbinstance.execure_sql("select {0} from impute_table where card4='{1}' and card6='{2}';".format(feature_names, card4, card6))
+        return cur
+
  
 def cursor_to_dataframe(cur):
     """
@@ -166,3 +194,7 @@ if __name__ == "__main__":
     cur =datasource.compute_average_value("train", "transactionamt", ["card4", "card6"])
     df = cursor_to_dataframe(cur)
     print(df)
+    datasource.set_impute_table_value('visa', 'debit', 'transactionamt', 11)
+    datasource.set_impute_table_value('visa', 'credit', 'transactionamt', 20)
+    cur = datasource.read_impute_table_value('visa', 'credit')
+    print(cursor_to_dataframe(cur))
