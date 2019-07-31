@@ -57,13 +57,28 @@ class DBInterface:
         f.readline()
         cur.copy_from(f, table_name, columns=header, sep=',', null="")
         self.connection.commit()
-
+    
     def get_cursor(self):
         """
         Return a cursor of the database.
         """
         return self.connection.cursor()
-
+ 
+    def execure_sql(self, sql_statement, to_write=False):
+        """
+        Execute an SQL statement.
+        Set `to_write` to True if you want to write values
+        If `to_write` is False, return a cursor of data
+        Else return None.
+        """
+        cur = self.connection.cursor()
+        cur.execute(sql_statement)
+        if to_write:
+            self.connection.commit()
+            cur.close()
+        else:
+            return cur
+       
 class DataSource:
     """
     Abstract of data source.
@@ -110,6 +125,29 @@ class DataSource:
         cur.execute(stat)
         return cur
 
+    def compute_average_value(self, set_label, feature, group_by_features):
+        """
+        Compute average of `feature` group by `group_by_features`.
+        `group_by_features` is a list of features.
+
+        Example: compute the transaction amount according to card4 and card6
+        ```
+        cur = datasource.compute_average_value("train", "transactionamt", ["card4", "card6"])
+        ```
+        """
+        tt = set_label + '_transaction'
+        it = set_label + '_identity'
+        feature = "foo." + feature
+        group_by_features = ["foo." + item for item in group_by_features]
+        group_by_features_str = ", ".join(group_by_features)
+        view_table_sub = "(SELECT * FROM {0} JOIN {1} USING (transactionid))".format(tt, it)
+        sql = "SELECT " + group_by_features_str + ", AVG("+ feature + ") FROM "
+        sql += view_table_sub + " AS foo GROUP BY " + group_by_features_str
+        sql +=";"
+        cur = self.dbinstance.execure_sql(sql)
+        return cur
+
+ 
 def cursor_to_dataframe(cur):
     """
     Transfer a database cursor into a pandas DataFrame.
@@ -124,6 +162,7 @@ def cursor_to_dataframe(cur):
 if __name__ == "__main__":
     datasource = DataSource()
     # datasource.load_data_to_db('.')
-    cur = datasource.select_data_by_transactiondt('train', 0, 1000000000, ['transactionid', 'card4', 'card6', 'devicetype', 'id_01', 'id_02', 'isfraud'])
+    # cur = datasource.select_data_by_transactiondt('train', 0, 1000000000, ['transactionid', 'card4', 'card6', 'devicetype', 'id_01', 'id_02', 'isfraud'])
+    cur =datasource.compute_average_value("train", "transactionamt", ["card4", "card6"])
     df = cursor_to_dataframe(cur)
     print(df)
