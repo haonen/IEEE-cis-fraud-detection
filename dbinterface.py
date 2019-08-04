@@ -125,7 +125,7 @@ class DataSource:
         cur.execute(stat)
         return cur
 
-    def compute_average_value(self, set_label, feature, group_by_features):
+    def compute_average_value(self, set_label, feature, group_by_features, low_dt=None, high_dt=None):
         """
         Compute average of `feature` group by `group_by_features`.
         `group_by_features` is a list of features.
@@ -134,7 +134,10 @@ class DataSource:
         ```
         cur = datasource.compute_average_value("train", "transactionamt", ["card4", "card6"])
         ```
+
+        If `low_dt` and `high_dt` are provided, only the data of transactiondt fall in [low_dt, high_dt] will be selected.
         """
+        assert ((low_dt is None) and (high_dt is None)) or ((low_dt is not None) and (high_dt is not None))
         tt = set_label + '_transaction'
         it = set_label + '_identity'
         feature = "foo." + feature
@@ -142,7 +145,11 @@ class DataSource:
         group_by_features_str = ", ".join(group_by_features)
         view_table_sub = "(SELECT * FROM {0} JOIN {1} USING (transactionid))".format(tt, it)
         sql = "SELECT " + group_by_features_str + ", AVG("+ feature + ") FROM "
-        sql += view_table_sub + " AS foo GROUP BY " + group_by_features_str
+        sql += view_table_sub + " AS foo"
+        if low_dt is not None:
+            assert low_dt <= high_dt
+            sql += " WHERE foo.transactiondt>={0} AND foo.transactiondt<{1}".format(low_dt, high_dt)
+        sql += " GROUP BY " + group_by_features_str
         sql +=";"
         cur = self.dbinstance.execure_sql(sql)
         return cur
@@ -191,7 +198,7 @@ if __name__ == "__main__":
     datasource = DataSource()
     # datasource.load_data_to_db('.')
     # cur = datasource.select_data_by_transactiondt('train', 0, 1000000000, ['transactionid', 'card4', 'card6', 'devicetype', 'id_01', 'id_02', 'isfraud'])
-    cur =datasource.compute_average_value("train", "transactionamt", ["card4", "card6"])
+    cur =datasource.compute_average_value("train", "transactionamt", ["card4", "card6"], low_dt=87000, high_dt=89000)
     df = cursor_to_dataframe(cur)
     print(df)
     datasource.set_impute_table_value('visa', 'debit', 'transactionamt', 11)
