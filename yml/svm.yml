@@ -6,6 +6,7 @@ transform:
           'id_29', 'id_30', 'id_31', 'id_32', 'id_33', 'id_34', 'id_35', 'id_36', 'id_37', 'id_38']
   dummy:
     k: [30]
+  impute_table_name: "impute_table_svm"
 
 models:
   SVC:
