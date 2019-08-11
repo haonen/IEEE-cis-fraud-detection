@@ -1,0 +1,53 @@
+
+transform:
+  cols : ['productcd', 'card1', 'card2', 'card3', 'card4', 'card5', 'card6', 'addr1', 'addr2', 'p_emaildomain', 'r_emaildomain',
+          'm1', 'm2', 'm3', 'm4', 'm5', 'm6', 'm7', 'm8', 'm9', 'devicetype', 'deviceinfo', 'id_12', 'id_13', 'id_14', 'id_15', 
+          'id_16', 'id_17', 'id_18', 'id_19', 'id_20', 'id_21', 'id_22', 'id_23', 'id_24', 'id_25', 'id_26', 'id_27', 'id_28', 
+          'id_29', 'id_30', 'id_31', 'id_32', 'id_33', 'id_34', 'id_35', 'id_36', 'id_37', 'id_38']
+  dummy:
+    k: [30]
+
+models:
+  DecisionTreeClassifier:
+    criterion: ['gini', 'entropy']
+    max_depth: [1,5,10,20,50,100]
+    min_samples_split: [2,5,10]
+    class_weight: "balanced"
+  RandomForestClassifier:
+    n_estimators: [100, 10000]
+    max_depth: [5,50]
+    max_features: ['sqrt','log2']
+    min_samples_split: [2,10]
+    n_jobs: [-1]
+    class_weight: "balanced"
+  LogisticRegression:
+    penalty: ['l1','l2']
+    C: [0.00001,0.001,0.1,1,10]
+    class_weight: "balanced"
+  BaggingClassifier:
+    n_estimators: [1, 10,100]
+    class_weight: "balanced"
+  ExtraTreesClassifier:
+    n_estimators: [100, 10000]
+    criterion: ['gini', 'entropy']
+    max_depth: [5,50]
+    max_features: ['sqrt','log2']
+    min_samples_split: [2,10]
+    n_jobs: [-1]
+    class_weight: "balanced"
+    
+ 
+time:
+  start_time: 86400
+  end_time: 15811131
+  interval: 2592093
+
+
+matrix:
+  percentage: [1, 2, 5, 10, 20, 30, 50]
+  col_list: ['model_name', 'parameters', 'auc_roc_1%', 'auc_roc_2%',
+             'auc_roc_5%', 'auc_roc_10%', 'auc_roc_20%', 'auc_roc_30%',
+             'auc_roc_50%']
+             
+  roc_path: "./output/first_priority/roc/"
+  out_path: "./output/first_priority/performance/"
