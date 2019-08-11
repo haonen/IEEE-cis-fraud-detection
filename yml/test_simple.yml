@@ -1,5 +1,6 @@
 io:
   input_path: "../data/full_dataset.csv"
+  impute_table_name: "impute_table"
 
 
 transform:
@@ -30,4 +31,5 @@ matrix:
              
   roc_path: "./output/roc/"
   out_path: "./output/performance/"
-  output_pred_probs_path: "./output/pred_probs/"
+  # enable folling path if you want to check the predicted scores
+  # output_pred_probs_path: "./output/pred_probs/"
