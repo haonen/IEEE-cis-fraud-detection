@@ -19,7 +19,7 @@ class Imputer():
     """
     """
     
-    def __init__(self):
+    def __init__(self, impute_table_name='impute_table'):
         '''
         attribute:
             cat_fill_value: the value to fill in categorical features
@@ -28,7 +28,16 @@ class Imputer():
         '''
         self.cat_fill_value = 'unknown'
         self.dbsource = dbinterface.DataSource()
-        self.impute_table_name = 'impute_table'
+        self.impute_table_name = impute_table_name
+        # read build_impute_table.sql and build table
+        try:
+            with open('build_impute_table.sql') as f:
+                sql_statement = f.read()
+        except IOError:
+            print("Cannot find 'build_impute_table.sql', please check it.")
+            exit(2)
+        sql_statement = sql_statement.replace('impute_table', impute_table_name)
+        self.dbsource.dbinstance.execute_sql(sql_statement, True)
         #self.cat_cols = cat_cols
         
     def impute_cat(self, X_train, X_test, cat_cols):
@@ -105,7 +114,7 @@ class Imputer():
     def feed_impute_table(self, X_train, low_dt, high_dt, cat_cols):
         '''
         '''
-        clear_cur = self.dbsource.dbinstance.execute_sql("DELETE FROM {}".format(self.impute_table_name))
+        clear_cur = self.dbsource.dbinstance.execute_sql("DELETE FROM {}".format(self.impute_table_name), True)
         #card4_stat = "SELECT card4 from train_transaction group by card4"
         #card6_stat = "SELECT card6 from train_transaci group by card6"
         #card4_values = self.dbsource.dbinstance.execute_sql(card4_stat).fetchall()
@@ -126,7 +135,5 @@ class Imputer():
                     else:
                         impute_value = -9999
                 
-                self.dbsource.set_impute_table_value(credit_type, card_type, column, impute_value)
-            
-            
+                self.dbsource.set_impute_table_value(self.impute_table_name, credit_type, card_type, column, impute_value)
         

@@ -1,7 +1,6 @@
 io:
   input_path: "../data/full_dataset.csv"
 
-
 transform:
   cols : ['productcd', 'card1', 'card2', 'card3', 'card4', 'card5', 'card6', 'addr1', 'addr2', 'p_emaildomain', 'r_emaildomain',
           'm1', 'm2', 'm3', 'm4', 'm5', 'm6', 'm7', 'm8', 'm9', 'devicetype', 'deviceinfo', 'id_12', 'id_13', 'id_14', 'id_15', 
@@ -9,6 +8,7 @@ transform:
           'id_29', 'id_30', 'id_31', 'id_32', 'id_33', 'id_34', 'id_35', 'id_36', 'id_37', 'id_38']
   dummy:
     k: [30]
+  impute_table_name: "impute_table"
 
 models:
   DecisionTreeClassifier:
@@ -30,4 +30,5 @@ matrix:
              
   roc_path: "./output/roc/"
   out_path: "./output/performance/"
-  output_pred_probs_path: "./output/pred_probs/"
+  # enable folling path if you want to check the predicted scores
+  # output_pred_probs_path: "./output/pred_probs/"

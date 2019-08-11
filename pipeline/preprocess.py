@@ -32,7 +32,7 @@ def transform(config, X_train, X_test, low_dt, high_dt):
     logger.info('begin to transform')
     logger.info('begin to impute')
     #initializing impute_table
-    imputer = Imputer()
+    imputer = Imputer(config['impute_table_name'])
     imputer.feed_impute_table(X_train, low_dt, high_dt, cat_cols)
         
     #imputing  
