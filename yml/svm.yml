@@ -28,5 +28,5 @@ matrix:
              'auc_roc_5%', 'auc_roc_10%', 'auc_roc_20%', 'auc_roc_30%',
              'auc_roc_50%']
              
-  roc_path: "./output/first_priority/roc/"
-  out_path: "./output/first_priority/performance/"
+  roc_path: "./output/svm/roc/"
+  out_path: "./output/svm/performance/"
