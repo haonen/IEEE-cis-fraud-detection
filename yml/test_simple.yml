@@ -30,3 +30,4 @@ matrix:
              
   roc_path: "./output/roc/"
   out_path: "./output/performance/"
+  output_pred_probs_path: "./output/pred_probs/"

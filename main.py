@@ -8,6 +8,7 @@ import yaml
 import pandas as pd
 import numpy as np
 import dbinterface
+import pickle
 from pipeline import preprocess
 from pipeline import evaluation
 from pipeline import model_factory
@@ -33,7 +34,10 @@ def run(config):
     trans_configs = configs['transform']
     model_configs = configs['models']
     matrix_configs = configs['matrix']
-    
+    if 'output_pred_probs_path' in matrix_configs:
+        output_pred_probs_path = matrix_configs['output_pred_probs_path']
+    else:
+        output_pred_probs_path = None
     
     #split
     count = 1
@@ -72,6 +76,10 @@ def run(config):
                     y_pred_probs = model.decision_function(X_test)
                 else:
                     y_pred_probs = model.predict_proba(X_test)[:, 1]
+                if output_pred_probs_path is not None:
+                    with open(os.path.join(output_pred_probs_path, name + '.pkl'), 'wb') as f:
+                        pickle.dump(y_pred_probs, f)
+                
                 index = len(results_df)
                 results_df.loc[index] = evaluation.get_matrix(results_df, y_pred_probs, y_test, name, model, count,index, matrix_configs)
                 gc.collect()
