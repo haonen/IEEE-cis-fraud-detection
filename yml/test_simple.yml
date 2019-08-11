@@ -1,7 +1,5 @@
 io:
   input_path: "../data/full_dataset.csv"
-  impute_table_name: "impute_table"
-
 
 transform:
   cols : ['productcd', 'card1', 'card2', 'card3', 'card4', 'card5', 'card6', 'addr1', 'addr2', 'p_emaildomain', 'r_emaildomain',
@@ -10,6 +8,7 @@ transform:
           'id_29', 'id_30', 'id_31', 'id_32', 'id_33', 'id_34', 'id_35', 'id_36', 'id_37', 'id_38']
   dummy:
     k: [30]
+  impute_table_name: "impute_table"
 
 models:
   DecisionTreeClassifier:

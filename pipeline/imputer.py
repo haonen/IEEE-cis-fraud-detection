@@ -36,7 +36,7 @@ class Imputer():
         except IOError:
             print("Cannot find 'build_impute_table.sql', please check it.")
             exit(2)
-        sql_statement.replace('impute_table', impute_table_name)
+        sql_statement = sql_statement.replace('impute_table', impute_table_name)
         self.dbsource.dbinstance.execute_sql(sql_statement, True)
         #self.cat_cols = cat_cols
         
@@ -114,7 +114,7 @@ class Imputer():
     def feed_impute_table(self, X_train, low_dt, high_dt, cat_cols):
         '''
         '''
-        clear_cur = self.dbsource.dbinstance.execute_sql("DELETE FROM {}".format(self.impute_table_name))
+        clear_cur = self.dbsource.dbinstance.execute_sql("DELETE FROM {}".format(self.impute_table_name), True)
         #card4_stat = "SELECT card4 from train_transaction group by card4"
         #card6_stat = "SELECT card6 from train_transaci group by card6"
         #card4_values = self.dbsource.dbinstance.execute_sql(card4_stat).fetchall()

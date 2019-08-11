@@ -161,7 +161,7 @@ class DataSource:
 
         please provide `impute_table_name` to choose the table to set.
         """
-        cur = self.dbinstance.execute_sql("select count(*) from impute_table where card4='"+card4+"' and card6='"+card6+"';")
+        cur = self.dbinstance.execute_sql("select count(*) from {0} where card4='{1}' and card6='{2}';".format(impute_table_name, card4, card6))
         record_num = cur.fetchone()[0]
         if record_num == 0:
             sql = "insert into {0}(card4, card6, {1}) values ('{2}', '{3}', {4});"

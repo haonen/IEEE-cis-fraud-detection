@@ -2,6 +2,8 @@ CREATE TABLE IF NOT EXISTS impute_table(
 	card4 varchar(50),
 	card6 varchar(50),
 	transactionamt real,
+        dist1 real,
+        dist2 real,
 	C1 real,
 	C2 real,
 	C3 real,
