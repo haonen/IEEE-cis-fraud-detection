@@ -11,10 +11,9 @@ transform:
 models:
   SVC:
     C: [0.00001,0.0001,0.001,0.01,0.1,1,10]
-    penalty: ["l1", "l2"]
     max_iter: [500]
     kernel: ['linear', 'poly', 'rbf']
-    class_weight: "balanced"
+    class_weight: ["balanced"]
     
  
 time:

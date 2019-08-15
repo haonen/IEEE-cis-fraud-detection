@@ -15,7 +15,7 @@ models:
     min_samples_split: [2,5,10]
     class_weight: ["balanced"]
   RandomForestClassifier:
-    n_estimators: [100, 10000]
+    n_estimators: [10, 50, 100, 1000]
     max_depth: [5,50]
     max_features: ['sqrt','log2']
     min_samples_split: [2,10]
@@ -27,9 +27,8 @@ models:
     class_weight: ["balanced"]
   BaggingClassifier:
     n_estimators: [1, 10,100]
-    class_weight: "balanced"
   ExtraTreesClassifier:
-    n_estimators: [100, 10000]
+    n_estimators: [10, 50, 100, 1000]
     criterion: ['gini', 'entropy']
     max_depth: [5,50]
     max_features: ['sqrt','log2']
