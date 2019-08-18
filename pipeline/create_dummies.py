@@ -32,8 +32,9 @@ def get_all_dummies(X_train, X_test, colname):
     # create dummies
     # logger.info('generate the dummy on column {}'.format(colname))
     for cat in cat_list:
-        X_test[cat] = np.where(X_test[colname] == cat, 1, 0)
-        X_train[cat] = np.where(X_train[colname] == cat, 1, 0)
+        new_col_name = colname + "::" + cat
+        X_test[new_col_name] = np.where(X_test[colname] == cat, 1, 0)
+        X_train[new_col_name] = np.where(X_train[colname] == cat, 1, 0)
     gc.collect()
 
 
@@ -54,8 +55,9 @@ def get_top_k_dummies(X_train, X_test, colname, k):
     # create dummies
     #logger.info('generate dummies on column {} of top {} values'.format(colname, k))
     for cat in top_k:
-        X_train[cat] = np.where(X_train[colname] == cat, 1, 0)
-        X_test[cat] = np.where(X_test[colname] == cat, 1, 0)
+        new_col_name = colname + "::" + cat
+        X_train[new_col_name] = np.where(X_train[colname] == cat, 1, 0)
+        X_test[new_col_name] = np.where(X_test[colname] == cat, 1, 0)
     X_train['{}_others'.format(colname)] = X_train.apply(
         lambda x: 0 if x[colname] in top_k else 1, axis=1)
     X_test['{}_others'.format(colname)] = X_test.apply(
