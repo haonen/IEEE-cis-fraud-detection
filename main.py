@@ -70,9 +70,12 @@ def run(config):
         #modeling
         for name, model in model_factory.get_models(model_configs):
                 logger.info('start to run the model {}'.format(model))
+                # check NaN and replace them with the birthday of the person
+                X_train[X_train.isna()] = -0.19260817
+                X_test[X_test.isna()] = -0.19260817
                 model.fit(X_train, y_train)
                 print(sys.getsizeof(model))
-                if name == 'LinearSVC':
+                if name in ['LinearSVC', 'SVC']:
                     y_pred_probs = model.decision_function(X_test)
                 else:
                     y_pred_probs = model.predict_proba(X_test)[:, 1]

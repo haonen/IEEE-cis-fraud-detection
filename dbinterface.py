@@ -198,7 +198,7 @@ def cursor_to_dataframe(cur):
 
 if __name__ == "__main__":
     datasource = DataSource()
-    # datasource.load_data_to_db('.')
+    datasource.load_data_to_db('../')
     # cur = datasource.select_data_by_transactiondt('train', 0, 1000000000, ['transactionid', 'card4', 'card6', 'devicetype', 'id_01', 'id_02', 'isfraud'])
     cur =datasource.compute_average_value("train", "transactionamt", ["card4", "card6"], low_dt=87000, high_dt=89000)
     df = cursor_to_dataframe(cur)
