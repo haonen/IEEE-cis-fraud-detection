@@ -93,13 +93,13 @@ def get_matrix(results_df, y_pred_probs, y_test, name, model, count, index, matr
         one row of record for the result dataframe 
     '''
     # Sort true y labels and predicted scores at the same time
-    y_pred_probs_sorted, y_test_sorted = zip(*sorted(zip(y_pred_probs, y_test), reverse=True))
+    # y_pred_probs_sorted, y_test_sorted = zip(*sorted(zip(y_pred_probs, y_test), reverse=True))
     # Write the evaluation results into data frame
-    threshold_list = matrix_configs['percentage']
+    #threshold_list = matrix_configs['percentage']
     record = [name, str(model)]
-    for t in threshold_list:
-        record.append(compute_auc_roc(y_test_sorted, y_pred_probs_sorted, t))
+    #for t in threshold_list:
+    record.append(roc_auc_score(y_test, y_pred_probs))
  
-    graph_name_roc = matrix_configs['roc_path'] + r'''roc_curve__{}_{}_{}'''.format(name,count,index)
+    #graph_name_roc = matrix_configs['roc_path'] + r'''roc_curve__{}_{}_{}'''.format(name,count,index)
     #plot_roc(str(model), graph_name_roc, y_pred_probs, y_test, 'save')
     return record
