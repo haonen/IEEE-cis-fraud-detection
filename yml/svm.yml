@@ -24,9 +24,7 @@ time:
 
 matrix:
   percentage: [1, 2, 5, 10, 20, 30, 50]
-  col_list: ['model_name', 'parameters', 'auc_roc_1%', 'auc_roc_2%',
-             'auc_roc_5%', 'auc_roc_10%', 'auc_roc_20%', 'auc_roc_30%',
-             'auc_roc_50%']
+  col_list: ['model_name', 'parameters', 'auc_roc']
              
   roc_path: "./output/svm/roc/"
   out_path: "./output/svm/performance/"
