@@ -46,15 +46,13 @@ def get_models(config):
         constructor = globals()[name]
         if name in dir(sklearn.ensemble):
             if 'base_estimator' in params:
-                if type(params['base_estimator']) is list:
-                    # this parameter has been modified
-                    continue
-                base_estimator_config = params['base_estimator']
-                base_estimator = list(get_models(base_estimator_config))
-                assert len(base_estimator) == 1, "Too much estimators are generated for AdaBoost"
-                print("Base estimator for Adaboost")
-                print(base_estimator[0][1])
-                params['base_estimator'] = [base_estimator[0][1]]
+                if type(params['base_estimator']) is not list:
+                    base_estimator_config = params['base_estimator']
+                    base_estimator = list(get_models(base_estimator_config))
+                    assert len(base_estimator) == 1, "Too much estimators are generated for AdaBoost"
+                    print("Base estimator for Adaboost")
+                    print(base_estimator[0][1])
+                    params['base_estimator'] = [base_estimator[0][1]]
 
         if name == 'GaussianNB':
             models =  [constructor()]

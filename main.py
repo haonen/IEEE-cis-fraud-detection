@@ -13,6 +13,7 @@ from pipeline import preprocess
 from pipeline import evaluation
 from pipeline import model_factory
 import logging
+from IPython import embed;
 
 logger = logging.getLogger('start to transform the data')
 ch = logging.StreamHandler(sys.stdout)
@@ -54,7 +55,6 @@ def run(config):
             break
         else:
             test_set_cur = dbsource.select_data_by_transactiondt('train', low_test, high_test, feature_list=None)
-       
         train_set = dbinterface.cursor_to_dataframe(train_set_cur)
         test_set = dbinterface.cursor_to_dataframe(test_set_cur)
         X_train = train_set.drop(columns=['isfraud', 'transactionid', 'transactiondt'])
@@ -69,27 +69,30 @@ def run(config):
         results_df = pd.DataFrame(columns=matrix_configs['col_list'])
         #modeling
         for name, model in model_factory.get_models(model_configs):
-                logger.info('start to run the model {}'.format(model))
-                # check NaN and replace them with the birthday of the person
-                X_train[X_train.isna()] = -0.19260817
-                X_test[X_test.isna()] = -0.19260817
-                model.fit(X_train, y_train)
-                print(sys.getsizeof(model))
-                if name in ['LinearSVC', 'SVC']:
-                    y_pred_probs = model.decision_function(X_test)
-                else:
-                    y_pred_probs = model.predict_proba(X_test)[:, 1]
-                if output_pred_probs_path is not None:
-                    with open(os.path.join(output_pred_probs_path, name + '.pkl'), 'wb') as f:
-                        pickle.dump(y_pred_probs, f)
+            logger.info('start to run the model {}'.format(model))
+            # check NaN and replace them with the birthday of the person
+            X_train[X_train.isna()] = -0.19260817
+            X_test[X_test.isna()] = -0.19260817
+            model.fit(X_train, y_train)
+            print(sys.getsizeof(model))
+            if name in ['LinearSVC', 'SVC']:
+                y_pred_probs = model.decision_function(X_test)
+            else:
+                y_pred_probs = model.predict_proba(X_test)[:, 1]
+            if output_pred_probs_path is not None:
+                with open(os.path.join(output_pred_probs_path, name + '.pkl'), 'wb') as f:
+                    pickle.dump(y_pred_probs, f)
                 
-                index = len(results_df)
-                results_df.loc[index] = evaluation.get_matrix(results_df, y_pred_probs, y_test, name, model, count,index, matrix_configs)
-                gc.collect()
-                graph_name_roc = matrix_configs['roc_path'] + r'''roc_curve__{}_{}_{}'''.format(name,count,index)
-                evaluation.plot_roc(str(model), graph_name_roc, y_pred_probs, y_test, 'save')
+            index = len(results_df)
+            results_df.loc[index] = evaluation.get_matrix(results_df, y_pred_probs, y_test, name, model, count,index, matrix_configs)
+            del X_train
+            del X_test
+            gc.collect()
+            graph_name_roc = matrix_configs['roc_path'] + r'''roc_curve__{}_{}_{}'''.format(name,count,index)
+            evaluation.plot_roc(str(model), graph_name_roc, y_pred_probs, y_test, 'save')
                 
         results_df.to_csv(matrix_configs['out_path'] + str(count) + ".csv")
+        print("Save result of piece {}!".format(count))
         count += 1
         
         
