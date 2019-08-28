@@ -32,3 +32,4 @@ matrix:
   col_list: ['model_name', 'parameters', 'auc_roc']
   roc_path: "./output/adaboost/roc/"
   out_path: "./output/adaboost/performance/"
+  final_score_path: "./output/adaboost/"

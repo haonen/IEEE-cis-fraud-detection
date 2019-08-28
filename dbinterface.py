@@ -100,6 +100,30 @@ class DataSource:
             fn = os.path.join(path, table_name + '.csv')
             self.dbinstance.build_table_from_csv(fn, pat, table_name)
             print("Loaded table " + table_name)
+    
+    def select_all_data(self, set_label, feature_list=None):
+        """
+        Select all data from a set.
+        `set_label` can be `train` or `test`. 
+        If `feature_list` is None, all columns will be retrieved;
+
+        Return a cursor object of the selected data. 
+        """
+        tt = set_label + '_transaction'
+        it = set_label + '_identity'
+        stat = "SELECT {0} FROM {1} LEFT OUTER JOIN {2} ON {1}.transactionid={2}.transactionid;"
+        
+        if feature_list is not None:
+            # transactionid is an ambigious term which appears in both table
+            feature_list = [item if item!='transactionid' else tt+'.' + item for item in feature_list]
+            feature_list= ', '.join(feature_list)
+        else:
+            feature_list = "*"
+        stat = stat.format(feature_list, tt, it)
+        cur = self.dbinstance.get_cursor();
+        cur.execute(stat)
+        return cur
+
 
     def select_data_by_transactiondt(self, set_label, low, high, feature_list=None):
         """
@@ -111,8 +135,8 @@ class DataSource:
         """
         tt = set_label + '_transaction'
         it = set_label + '_identity'
-        stat = "SELECT {0} FROM {1}, {2} WHERE {1}.transactionid={2}.transactionid \
-                AND {1}.transactiondt>={3} AND {1}.transactiondt<{4};"
+        stat = "SELECT {0} FROM {1} LEFT OUTER JOIN {2} ON {1}.transactionid={2}.transactionid \
+                WHERE {1}.transactiondt>={3} AND {1}.transactiondt<{4};"
         
         if feature_list is not None:
             # transactionid is an ambigious term which appears in both table

@@ -30,5 +30,6 @@ matrix:
              
   roc_path: "./output/roc/"
   out_path: "./output/performance/"
+  final_score_path: "./output/"
   # enable folling path if you want to check the predicted scores
   # output_pred_probs_path: "./output/pred_probs/"

@@ -85,8 +85,6 @@ def run(config):
                 
             index = len(results_df)
             results_df.loc[index] = evaluation.get_matrix(results_df, y_pred_probs, y_test, name, model, count,index, matrix_configs)
-            del X_train
-            del X_test
             gc.collect()
             graph_name_roc = matrix_configs['roc_path'] + r'''roc_curve__{}_{}_{}'''.format(name,count,index)
             evaluation.plot_roc(str(model), graph_name_roc, y_pred_probs, y_test, 'save')
