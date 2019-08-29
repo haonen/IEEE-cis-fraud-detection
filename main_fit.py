@@ -41,34 +41,45 @@ def run(config):
         output_pred_probs_path = None
     
     dbsource = dbinterface.DataSource()
-  
-    train_set_cur = dbsource.select_data_by_transactiondt('train', start_time, end_time, feature_list=None)
-    train_set = dbinterface.cursor_to_dataframe(train_set_cur)
-    test_set_cur = dbsource.select_all_data('test', feature_list=None)
-    test_set = dbinterface.cursor_to_dataframe(test_set_cur)
-    print("Train data count = {}".format(len(train_set)))
-    print("Test data count = {}".format(len(test_set)))
-    X_train = train_set.drop(columns=['isfraud', 'transactionid', 'transactiondt'])
-    X_test = test_set.drop(columns=['transactionid', 'transactiondt'])
-    y_train = train_set['isfraud']
-    transactionid_test = test_set['transactionid']
-
-    #preprocessing
-    X_train, X_test = preprocess.transform(trans_configs, X_train, X_test, start_time, end_time)
 
     #initializing result dictionary
     results_dict = {}
-    results_dict['transactionid'] = transactionid_test.to_numpy()[:, 0]
     #modeling
     model_id = 0
     for name, model in model_factory.get_models(model_configs):
         model_id += 1
+        # loading training data
+        logger.info('loading training data...')
+        train_set_cur = dbsource.select_data_by_transactiondt('train', start_time, end_time, feature_list=None)
+        train_set = dbinterface.cursor_to_dataframe(train_set_cur)
+        print("Train data count = {}".format(len(train_set)))
+        X_train = train_set.drop(columns=['isfraud', 'transactionid', 'transactiondt'])
+        y_train = train_set['isfraud']
+        X_train, transform_config = preprocess.transform_train(trans_configs, X_train, start_time, high_train)
+
+
         logger.info('start to run the model {}'.format(model))
         # check NaN and replace them with the birthday of the person
         X_train[X_train.isna()] = -0.19260817
-        X_test[X_test.isna()] = -0.19260817
         model.fit(X_train, y_train)
         print(sys.getsizeof(model))
+        
+        # clean training data
+        del train_set
+        del X_train
+        del y_train
+        gc.collect()
+        logger.info("Please check that memory are release! Then press enter")
+        input()
+
+        # load test data
+        test_set_cur = dbsource.select_all_data('test', feature_list=None)
+        test_set = dbinterface.cursor_to_dataframe(test_set_cur)
+        print("Test data count = {}".format(len(test_set)))
+        X_test = test_set.drop(columns=['transactionid', 'transactiondt'])
+        transactionid_test = test_set['transactionid']
+        results_dict['TransactionID'] = transactionid_test.to_numpy()[:, 0]
+        X_test = preprocess.transform_test(trans_configs, X_test, transform_config)
         if name in ['LinearSVC', 'SVC']:
             y_pred_probs = model.decision_function(X_test)
         else:
@@ -77,6 +88,9 @@ def run(config):
             with open(os.path.join(output_pred_probs_path, name + '.pkl'), 'wb') as f:
                 pickle.dump(y_pred_probs, f)
         results_dict['model_{}'.format(model_id)] = y_pred_probs
+        del X_test
+        del test_set
+        del transactionid_test
         gc.collect()
     results_df = pd.DataFrame(data=results_dict)
     results_df.to_csv(matrix_configs['final_score_path'] + "final_predict_score.csv", index=False)
