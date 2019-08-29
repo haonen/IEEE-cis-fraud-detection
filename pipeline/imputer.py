@@ -56,6 +56,19 @@ class Imputer():
             X_test[column].fillna(self.cat_fill_value)
         return X_train, X_test
     
+    def impute_cat_single_table(self, X_t, cat_cols):
+        '''
+        Impute categorical features
+        Inputs:
+            X_t: df to impute
+            cat_cols: a list of catgorical column names
+        Returns:
+            X_t with imputed values
+        '''
+        for column in cat_cols:
+            logger.info('imputing {}'.format(column))
+            X_t[column].fillna(self.cat_fill_value)     
+        return X_t
     
     def impute_cond(self, X_train, X_test, cat_cols):
         '''
@@ -87,6 +100,28 @@ class Imputer():
                     
         return X_train, X_test
     
+    def impute_cond_single_table(self, X_t, cat_cols):
+        '''
+        Impute continuous features
+        Inputs:
+            X_t: dataframe
+            cat_cols: a list of catgorical column names
+        Returns:
+            X_t with imputed value
+        '''
+        cond_cols = list(set(list(X_t.columns)) - set(cat_cols))
+        cat_card4 = list(X_t['card4'].value_counts().index)
+        cat_card6 = list(X_t['card6'].value_counts().index)
+        for column in cond_cols:
+            logger.info('imputing {}'.format(column))
+            for credit_type in cat_card4:
+                for card_type in cat_card6:
+                    group_mean = self.fetch_group_mean(column, credit_type, card_type)
+                    condition = ((X_t[column].isnull()) & (X_t['card4'] == credit_type)
+                                      & (X_t['card6'] == card_type))
+                    X_t.loc[condition, column] = group_mean
+                    
+        return X_t
     
     def fetch_group_mean(self, column, credit_type, card_type):
         '''

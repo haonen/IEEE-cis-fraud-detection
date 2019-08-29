@@ -48,3 +48,4 @@ matrix:
              
   roc_path: "./output/first_priority/roc/"
   out_path: "./output/first_priority/performance/"
+  final_score_path: "./output/"

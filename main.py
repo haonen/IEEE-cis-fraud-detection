@@ -63,7 +63,9 @@ def run(config):
         y_test = test_set['isfraud']
     
         #preprocessing
-        X_train, X_test = preprocess.transform(trans_configs, X_train, X_test, start_time, high_train)
+        # X_train, X_test = preprocess.transform(trans_configs, X_train, X_test, start_time, high_train)
+        X_train, transform_config = preprocess.transform_train(trans_configs, X_train, start_time, high_train)
+        X_test = preprocess.transform_test(trans_configs, X_test, transform_config)
         
         #initializing result df
         results_df = pd.DataFrame(columns=matrix_configs['col_list'])
@@ -82,7 +84,6 @@ def run(config):
             if output_pred_probs_path is not None:
                 with open(os.path.join(output_pred_probs_path, name + '.pkl'), 'wb') as f:
                     pickle.dump(y_pred_probs, f)
-                
             index = len(results_df)
             results_df.loc[index] = evaluation.get_matrix(results_df, y_pred_probs, y_test, name, model, count,index, matrix_configs)
             gc.collect()
