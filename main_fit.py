@@ -55,7 +55,7 @@ def run(config):
         print("Train data count = {}".format(len(train_set)))
         X_train = train_set.drop(columns=['isfraud', 'transactionid', 'transactiondt'])
         y_train = train_set['isfraud']
-        X_train, transform_config = preprocess.transform_train(trans_configs, X_train, start_time, high_train)
+        X_train, transform_config = preprocess.transform_train(trans_configs, X_train, start_time, end_time)
 
 
         logger.info('start to run the model {}'.format(model))
@@ -69,8 +69,8 @@ def run(config):
         del X_train
         del y_train
         gc.collect()
-        logger.info("Please check that memory are release! Then press enter")
-        input()
+        # logger.info("Please check that memory are release! Then press enter")
+        # input()
 
         # load test data
         test_set_cur = dbsource.select_all_data('test', feature_list=None)
@@ -78,8 +78,9 @@ def run(config):
         print("Test data count = {}".format(len(test_set)))
         X_test = test_set.drop(columns=['transactionid', 'transactiondt'])
         transactionid_test = test_set['transactionid']
-        results_dict['TransactionID'] = transactionid_test.to_numpy()[:, 0]
+        results_dict['TransactionID'] = transactionid_test.to_numpy()
         X_test = preprocess.transform_test(trans_configs, X_test, transform_config)
+        X_test[X_test.isna()] = -0.19260817
         if name in ['LinearSVC', 'SVC']:
             y_pred_probs = model.decision_function(X_test)
         else:

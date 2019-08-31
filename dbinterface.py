@@ -111,8 +111,8 @@ class DataSource:
         """
         tt = set_label + '_transaction'
         it = set_label + '_identity'
-        stat = "SELECT {0} FROM {1} LEFT OUTER JOIN {2} ON {1}.transactionid={2}.transactionid;"
-        
+        # stat = "SELECT {0} FROM {1} LEFT OUTER JOIN {2} ON {1}.transactionid={2}.transactionid;"
+        stat = "SELECT {0} FROM {1};"        
         if feature_list is not None:
             # transactionid is an ambigious term which appears in both table
             feature_list = [item if item!='transactionid' else tt+'.' + item for item in feature_list]
@@ -135,7 +135,9 @@ class DataSource:
         """
         tt = set_label + '_transaction'
         it = set_label + '_identity'
-        stat = "SELECT {0} FROM {1} LEFT OUTER JOIN {2} ON {1}.transactionid={2}.transactionid \
+        # stat = "SELECT {0} FROM {1} LEFT OUTER JOIN {2} ON {1}.transactionid={2}.transactionid \
+        #         WHERE {1}.transactiondt>={3} AND {1}.transactiondt<{4};"
+        stat = "SELECT {0} FROM {1} \
                 WHERE {1}.transactiondt>={3} AND {1}.transactiondt<{4};"
         
         if feature_list is not None:
